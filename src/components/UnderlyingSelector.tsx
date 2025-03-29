@@ -6,7 +6,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 // Example data
 const stocks = [
@@ -22,23 +22,25 @@ const stocks = [
   { value: 'v', label: 'V', marketCap: '$512.8B', sector: 'Financial Services' },
 ];
 
-export function UnderlyingSelector() {
+const UnderlyingSelector = () => {
+  const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('spy'); // Default to SPY
   
   const handleSelectStock = (currentValue: string) => {
-    const newValue = currentValue === value ? "" : currentValue;
-    setValue(newValue || 'spy'); // Fallback to SPY if nothing selected
-    setOpen(false);
-    
-    const selectedStock = stocks.find((stock) => stock.value === (newValue || 'spy'));
-    if (selectedStock) {
-      toast({
-        title: `Selected ${selectedStock.label}`,
-        description: `Market Cap: ${selectedStock.marketCap} | Sector: ${selectedStock.sector}`,
-        duration: 3000,
-      });
+    if (currentValue) {
+      setValue(currentValue);
+      
+      const selectedStock = stocks.find((stock) => stock.value === currentValue);
+      if (selectedStock) {
+        toast({
+          title: `Selected ${selectedStock.label}`,
+          description: `Market Cap: ${selectedStock.marketCap} | Sector: ${selectedStock.sector}`,
+          duration: 3000,
+        });
+      }
     }
+    setOpen(false);
   };
 
   return (
@@ -91,6 +93,6 @@ export function UnderlyingSelector() {
       </Popover>
     </div>
   );
-}
+};
 
 export default UnderlyingSelector;

@@ -8,13 +8,18 @@ import MetricsPanel from '@/components/MetricsPanel';
 import OptionChain from '@/components/OptionChain';
 import TradeRecommendations from '@/components/TradeRecommendations';
 import UnderlyingSelector from '@/components/UnderlyingSelector';
+import HistoricalPerformance from '@/components/HistoricalPerformance';
+import RiskAnalysis from '@/components/RiskAnalysis';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
+
+// Define the allowed data mode types
+type DataMode = 'live' | 'historical' | 'simulated';
 
 const Index = () => {
   const { toast } = useToast();
-  const [dataMode, setDataMode] = useState('live');
+  const [dataMode, setDataMode] = useState<DataMode>('live');
 
   useEffect(() => {
     // Show a welcome toast when the application loads
@@ -38,7 +43,7 @@ const Index = () => {
   }, [toast]);
 
   const handleModeChange = (value: string) => {
-    setDataMode(value);
+    setDataMode(value as DataMode);
     
     // Provide feedback on mode change
     const modeMessages = {
@@ -88,6 +93,12 @@ const Index = () => {
             <div className="space-y-6">
               <VolatilitySurface />
               <OptionChain />
+              
+              {/* Additional content below OptionChain */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <HistoricalPerformance />
+                <RiskAnalysis />
+              </div>
             </div>
           </div>
           

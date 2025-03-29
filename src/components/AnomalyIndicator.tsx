@@ -2,7 +2,14 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowUpRight, ArrowDownRight, AlertTriangle } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, AlertTriangle, Info } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Example anomaly data
 const anomalies = [
@@ -18,6 +25,7 @@ const anomalies = [
     difference: 6.3,
     tradeAction: 'Sell Puts',
     timestamp: '2 mins ago',
+    explanation: 'Market fear is causing SPY 30-day puts to be significantly overpriced based on historical volatility patterns. Machine learning models suggest regression to historical mean is likely.'
   },
   {
     id: 2,
@@ -31,6 +39,7 @@ const anomalies = [
     difference: -2.6,
     tradeAction: 'Calendar Spread',
     timestamp: '5 mins ago',
+    explanation: 'AAPL volatility term structure shows unusual flattening, with mid-term options underpriced relative to near-term. This pricing anomaly has historically reverted within 7-10 trading days.'
   },
   {
     id: 3,
@@ -44,10 +53,21 @@ const anomalies = [
     difference: 5.3,
     tradeAction: 'Iron Condor',
     timestamp: '18 mins ago',
+    explanation: 'TSLA short-dated options are showing elevated IV due to recent news, but similar historical catalysts have resulted in less realized volatility than implied. Statistical edge exists in selling this inflated volatility.'
   }
 ];
 
 const AnomalyIndicator = () => {
+  const { toast } = useToast();
+
+  const handleAnomalyClick = (anomaly: typeof anomalies[0]) => {
+    toast({
+      title: `${anomaly.ticker} ${anomaly.type} Anomaly Details`,
+      description: anomaly.explanation,
+      duration: 5000,
+    });
+  };
+
   return (
     <Card className="h-full">
       <CardHeader className="pb-2">
@@ -61,7 +81,11 @@ const AnomalyIndicator = () => {
       <CardContent className="overflow-auto max-h-[400px]">
         <div className="space-y-3">
           {anomalies.map((anomaly) => (
-            <div key={anomaly.id} className="p-3 rounded-md border border-border bg-card/50 hover:bg-card/80 transition-colors">
+            <div 
+              key={anomaly.id} 
+              className="p-3 rounded-md border border-border bg-card/50 hover:bg-card/80 transition-colors cursor-pointer"
+              onClick={() => handleAnomalyClick(anomaly)}
+            >
               <div className="flex justify-between items-start mb-2">
                 <div>
                   <h3 className="font-medium flex items-center">
@@ -98,9 +122,23 @@ const AnomalyIndicator = () => {
                     {Math.abs(anomaly.difference)}%
                   </p>
                 </div>
-                <div>
-                  <p className="data-label">Recommended</p>
-                  <p className="font-medium text-primary">{anomaly.tradeAction}</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="data-label">Recommended</p>
+                    <p className="font-medium text-primary">{anomaly.tradeAction}</p>
+                  </div>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="text-muted-foreground hover:text-foreground">
+                          <Info className="h-4 w-4" />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-[300px] text-xs">
+                        <p>{anomaly.explanation}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </div>
             </div>

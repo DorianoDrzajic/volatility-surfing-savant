@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import VolatilitySurface from '@/components/VolatilitySurface';
@@ -14,6 +14,7 @@ import { useEffect } from 'react';
 
 const Index = () => {
   const { toast } = useToast();
+  const [dataMode, setDataMode] = useState('live');
 
   useEffect(() => {
     // Show a welcome toast when the application loads
@@ -36,6 +37,27 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, [toast]);
 
+  const handleModeChange = (value: string) => {
+    setDataMode(value);
+    
+    // Provide feedback on mode change
+    const modeMessages = {
+      'live': "Switched to Live Data Mode",
+      'historical': "Switched to Historical Data Mode",
+      'simulated': "Switched to Simulated Data Mode"
+    };
+    
+    toast({
+      title: modeMessages[value as keyof typeof modeMessages],
+      description: value === 'historical' ? 
+        "Historical data from Jan 1 - Mar 31, 2024 loaded." : 
+        value === 'simulated' ? 
+          "Running Monte Carlo simulation with parameters from settings." : 
+          "Connected to real-time data feed.",
+      duration: 3000,
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col grid-bg">
       <Header />
@@ -46,7 +68,7 @@ const Index = () => {
           <UnderlyingSelector />
           
           <div className="flex items-center space-x-4">
-            <Tabs defaultValue="live" className="w-[300px]">
+            <Tabs defaultValue="live" value={dataMode} onValueChange={handleModeChange} className="w-[300px]">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="live">Live</TabsTrigger>
                 <TabsTrigger value="historical">Historical</TabsTrigger>
@@ -57,7 +79,7 @@ const Index = () => {
         </div>
         
         {/* Metrics Overview Panel */}
-        <MetricsPanel />
+        <MetricsPanel mode={dataMode} />
         
         {/* Main Content Area */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

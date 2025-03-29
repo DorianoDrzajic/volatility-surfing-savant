@@ -1,11 +1,12 @@
 
-import React from 'react';
-import { Check, ChevronsUpDown, Search } from 'lucide-react';
+import React, { useState } from 'react';
+import { Check, ChevronsUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { toast } from '@/hooks/use-toast';
 
 // Example data
 const stocks = [
@@ -22,8 +23,23 @@ const stocks = [
 ];
 
 export function UnderlyingSelector() {
-  const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState('spy'); // Default to SPY
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState('spy'); // Default to SPY
+  
+  const handleSelectStock = (currentValue: string) => {
+    const newValue = currentValue === value ? "" : currentValue;
+    setValue(newValue || 'spy'); // Fallback to SPY if nothing selected
+    setOpen(false);
+    
+    const selectedStock = stocks.find((stock) => stock.value === (newValue || 'spy'));
+    if (selectedStock) {
+      toast({
+        title: `Selected ${selectedStock.label}`,
+        description: `Market Cap: ${selectedStock.marketCap} | Sector: ${selectedStock.sector}`,
+        duration: 3000,
+      });
+    }
+  };
 
   return (
     <div className="flex items-center gap-3">
@@ -52,10 +68,7 @@ export function UnderlyingSelector() {
                 <CommandItem
                   key={stock.value}
                   value={stock.value}
-                  onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue);
-                    setOpen(false);
-                  }}
+                  onSelect={handleSelectStock}
                 >
                   <Check
                     className={cn(
